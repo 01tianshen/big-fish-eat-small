@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大鱼吃小鱼 - 海洋冒险</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="game-container">
+    <div class="ocean-background">
+      <div class="bubbles"></div>
+      <div class="seaweed-left"></div>
+      <div class="seaweed-right"></div>
+      <div class="sand-bottom"></div>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="game-ui">
+      <div class="top-bar">
+        <div class="player-info">
+          <span class="label">等级</span>
+          <span class="value level">LV1</span>
+        </div>
+        <div class="player-info">
+          <span class="label">分数</span>
+          <span class="value score">0</span>
+        </div>
+        <div class="player-info">
+          <span class="label">时间</span>
+          <span class="value game-time">00:00</span>
+        </div>
+        <div class="player-info hearts-info">
+          <span class="label">生命</span>
+          <div class="hearts">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart empty">🖤</span>
+            <span class="heart empty">🖤</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="experience-bar">
+        <div class="exp-label">经验值</div>
+        <div class="exp-track">
+          <div class="exp-fill"></div>
+        </div>
+        <div class="exp-text">0/30</div>
+      </div>
+      
+      <div class="save-btn" onclick="saveGame()">保存</div>
+    </div>
+    
+    <div class="auth-screen" id="authScreen">
+      <div class="auth-content">
+        <h1>🐠 大鱼吃小鱼 🐟</h1>
+        
+        <div id="loginForm">
+          <h2>登录</h2>
+          <input type="text" id="loginUsername" placeholder="用户名" maxlength="20" autocomplete="username">
+          <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
+          <button class="auth-btn" onclick="handleLogin()">登录</button>
+          <p class="auth-link" onclick="showRegisterForm()">还没有账号？点击注册</p>
+        </div>
+        
+        <div id="registerForm" style="display: none;">
+          <h2>注册</h2>
+          <input type="text" id="registerUsername" placeholder="用户名（至少3位）" maxlength="20" autocomplete="username">
+          <input type="password" id="registerPassword" placeholder="密码（至少6位）" autocomplete="new-password">
+          <input type="password" id="registerConfirmPassword" placeholder="确认密码" autocomplete="new-password">
+          <input type="email" id="registerEmail" placeholder="邮箱（可选）" autocomplete="email">
+          <button class="auth-btn" onclick="handleRegister()">注册</button>
+          <p class="auth-link" onclick="showLoginForm()">已有账号？点击登录</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="start-screen" id="startScreen" style="display: none;">
+      <div class="start-content">
+        <div class="user-bar">
+          <span id="currentUser">欢迎</span>
+          <button class="records-btn" onclick="loadUserRecords(1)">📊 我的记录</button>
+          <button class="ranking-btn" onclick="loadRanking()">🏆 排行榜</button>
+          <button class="logout-btn" onclick="logout()">退出登录</button>
+          <button class="admin-btn" id="adminPanelBtn" style="display: none;" onclick="loadAdminPanel()">管理面板</button>
+        </div>
+        
+        <h1>🐠 大鱼吃小鱼 🐟</h1>
+        <p>使用鼠标或 WASD 键控制金色鲤鱼移动</p>
+        <p>吃掉比你小的鱼来成长，达到 LV7 即可获胜！</p>
+        
+        <div class="mode-selection">
+          <h3>选择难度</h3>
+          <div class="mode-buttons">
+            <button class="mode-btn active" data-mode="easy" onclick="selectMode('easy')">
+              简单模式
+              <span>鱼群不会逃跑</span>
+            </button>
+            <button class="mode-btn" data-mode="normal" onclick="selectMode('normal')">
+              正常模式
+              <span>小鱼会逃跑</span>
+            </button>
+            <button class="mode-btn" data-mode="hard" onclick="selectMode('hard')">
+              困难模式
+              <span>更多大鱼，速度更快</span>
+            </button>
+          </div>
+        </div>
+        
+        <button class="start-btn" onclick="startGame()">开始游戏</button>
+      </div>
+    </div>
+    
+    <div class="game-over-screen" id="gameOverScreen" style="display: none;">
+      <div class="game-over-content">
+        <h2>游戏结束</h2>
+        <p>最终等级: <span id="finalLevel">LV1</span></p>
+        <p>最终分数: <span id="finalScore">0</span></p>
+        <p>游戏时间: <span id="finalTime">00:00</span></p>
+        <button class="start-btn" onclick="restartGame()">重新开始</button>
+      </div>
+    </div>
+    
+    <div class="victory-screen" id="victoryScreen" style="display: none;">
+      <div class="victory-content">
+        <h2>🎉 恭喜通关！🎉</h2>
+        <p>你已达到最高等级 <span id="victoryLevel">LV7</span>！</p>
+        <p>最终分数: <span id="victoryScore">0</span></p>
+        <p>通关时间: <span id="victoryTime">00:00</span></p>
+        <button class="start-btn" onclick="restartGame()">再玩一次</button>
+      </div>
+    </div>
+    
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+      <div class="admin-content">
+        <div class="admin-header">
+          <h2>管理员面板</h2>
+          <button class="close-btn" onclick="closeAdminPanel()">✕</button>
+        </div>
+        
+        <div id="adminStats" class="admin-stats">
+          <div>总用户数: 0</div>
+          <div>总游戏记录: 0</div>
+          <div>最高等级: 0</div>
+          <div>平均分数: 0</div>
+        </div>
+        
+        <div class="admin-section">
+          <h3>用户管理</h3>
+          <table id="usersTable" class="admin-table">
+            <tr><th>ID</th><th>用户名</th><th>邮箱</th><th>是否管理员</th><th>注册时间</th><th>操作</th></tr>
+          </table>
+        </div>
+        
+        <div class="admin-section">
+          <h3>游戏记录</h3>
+          <table id="recordsTable" class="admin-table">
+            <tr><th>记录ID</th><th>用户ID</th><th>用户名</th><th>模式</th><th>等级</th><th>分数</th><th>时间</th><th>操作</th></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="user-records-panel" id="userRecordsPanel" style="display: none;">
+      <div class="user-records-content">
+        <div class="user-records-header">
+          <h2>🎮 我的游戏记录</h2>
+          <button class="close-btn" onclick="closeUserRecords()">✕</button>
+        </div>
+        
+        <div id="userStats" class="user-stats">
+          <div id="userLevelDisplay">玩家等级: LV1 (鱼卒)</div>
+          <div>总游戏次数: <span id="totalGames">0</span></div>
+          <div>最高等级: <span id="maxLevel">0</span></div>
+          <div>最高分数: <span id="maxScore">0</span></div>
+          <div>最快通关: <span id="bestTime">-</span></div>
+        </div>
+        
+        <div class="user-records-section">
+          <h3>游戏历史记录</h3>
+          <table id="userRecordsTable" class="user-records-table">
+            <tr><th>日期</th><th>模式</th><th>等级</th><th>分数</th><th>用时</th></tr>
+          </table>
+          <div id="recordsPagination" class="pagination"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="ranking-panel" id="rankingPanel" style="display: none;">
+      <div class="ranking-content">
+        <div class="ranking-header">
+          <h2>🌊 海洋王者争霸赛 🏆</h2>
+          <button class="close-btn" onclick="closeRanking()">✕</button>
+        </div>
+        
+        <div class="ranking-tabs">
+          <button class="ranking-tab human active" data-mode="easy" onclick="loadRankingByMode('easy')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-name">人榜</span>
+            <span class="tab-desc">简单模式</span>
+          </button>
+          <button class="ranking-tab earth" data-mode="normal" onclick="loadRankingByMode('normal')">
+            <span class="tab-icon">🌍</span>
+            <span class="tab-name">地榜</span>
+            <span class="tab-desc">正常模式</span>
+          </button>
+          <button class="ranking-tab heaven" data-mode="hard" onclick="loadRankingByMode('hard')">
+            <span class="tab-icon">👑</span>
+            <span class="tab-name">天榜</span>
+            <span class="tab-desc">困难模式</span>
+          </button>
+        </div>
+        
+        <div class="ranking-list" id="rankingList">
+          <div class="ranking-loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="title-popup" id="titlePopup" style="display: none;">
+      <div class="title-popup-content">
+        <div class="title-popup-header">
+          <h2>🌊 海神赐福 🌊</h2>
+          <p>恭喜你达到 LV90！获得自定义称号的资格！</p>
+        </div>
+        <div class="title-popup-body">
+          <label for="titleInput">请输入你的专属称号（最多10字）：</label>
+          <input type="text" id="titleInput" maxlength="10" placeholder="输入你的称号">
+        </div>
+        <div class="title-popup-footer">
+          <button class="btn btn-primary" onclick="saveTitle()">确定</button>
+          <button class="btn btn-secondary" onclick="closeTitlePopup()">跳过</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="blessing-popup" id="blessingPopup" style="display: none;">
+      <div class="blessing-popup-content">
+        <div class="blessing-popup-header">
+          <h2>🌊 海神赐福 🌊</h2>
+        </div>
+        <div class="blessing-popup-body">
+          <p>选择要赐福的等级：</p>
+          <div class="level-buttons">
+            <button class="level-btn" onclick="setBlessingLevel(10)">LV10 鱼士</button>
+            <button class="level-btn" onclick="setBlessingLevel(20)">LV20 鱼师</button>
+            <button class="level-btn" onclick="setBlessingLevel(30)">LV30 鱼尊</button>
+            <button class="level-btn" onclick="setBlessingLevel(40)">LV40 鱼宗</button>
+            <button class="level-btn" onclick="setBlessingLevel(50)">LV50 鱼王</button>
+            <button class="level-btn" onclick="setBlessingLevel(60)">LV60 鱼帝</button>
+            <button class="level-btn" onclick="setBlessingLevel(70)">LV70 鱼圣</button>
+            <button class="level-btn" onclick="setBlessingLevel(80)">LV80 鱼斗罗</button>
+            <button class="level-btn" onclick="setBlessingLevel(90)">LV90 封号斗罗</button>
+          </div>
+          <div class="custom-level">
+            <label>自定义等级:</label>
+            <input type="number" id="customLevel" min="1" max="100" placeholder="输入等级">
+            <button class="btn btn-primary" onclick="applyBlessing()">赐福</button>
+          </div>
+        </div>
+        <div class="blessing-popup-footer">
+          <button class="btn btn-secondary" onclick="closeBlessingPopup()">取消</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="blessing-notification" id="blessingNotification" style="display: none;">
+      <div class="blessing-notification-content">
+        <h2>🎉 海神赐福 🎉</h2>
+        <p id="blessingMessage">您获得海神赐福，等级提升至 LV10！</p>
+        <button class="btn btn-primary" onclick="closeBlessingNotification()">确定</button>
+      </div>
+    </div>
+    
+    <div class="blessing-choice-popup" id="blessingChoicePopup" style="display: none;">
+      <div class="blessing-choice-content">
+        <div class="blessing-choice-header">
+          <h2>🌊 海神赐福 🌊</h2>
+        </div>
+        <div class="blessing-choice-body">
+          <p id="blessingChoiceMessage">海神赐予您祝福，等级将从 LV1 提升至 LV10！</p>
+          <p class="blessing-title-hint">称号：<span id="blessingTitleHint">鱼士</span></p>
+        </div>
+        <div class="blessing-choice-footer">
+          <button class="btn btn-primary" onclick="acceptBlessing()">接受赐福</button>
+          <button class="btn btn-secondary" onclick="rejectBlessing()">暂不接受</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="punishment-notification" id="punishmentNotification" style="display: none;">
+      <div class="punishment-notification-content">
+        <h2>⚡ 神罚降临 ⚡</h2>
+        <p id="punishmentMessage">您受到神罚，等级从 LV10 降至 LV5！</p>
+        <button class="btn btn-primary" onclick="closePunishmentNotification()">确定</button>
+      </div>
+    </div>
+    
+    <div class="punishment-popup" id="punishmentPopup" style="display: none;">
+      <div class="punishment-popup-content">
+        <div class="punishment-popup-header">
+          <h2>⚡ 神罚 ⚡</h2>
+        </div>
+        <div class="punishment-popup-body">
+          <p>选择要降罚的等级：</p>
+          <div class="level-buttons">
+            <button class="level-btn" onclick="setPunishmentLevel(10)">降至 LV10</button>
+            <button class="level-btn" onclick="setPunishmentLevel(20)">降至 LV20</button>
+            <button class="level-btn" onclick="setPunishmentLevel(30)">降至 LV30</button>
+            <button class="level-btn" onclick="setPunishmentLevel(40)">降至 LV40</button>
+            <button class="level-btn" onclick="setPunishmentLevel(50)">降至 LV50</button>
+            <button class="level-btn" onclick="setPunishmentLevel(60)">降至 LV60</button>
+            <button class="level-btn" onclick="setPunishmentLevel(70)">降至 LV70</button>
+            <button class="level-btn" onclick="setPunishmentLevel(80)">降至 LV80</button>
+            <button class="level-btn" onclick="setPunishmentLevel(1)">降至 LV1</button>
+          </div>
+          <div class="custom-level">
+            <label>自定义等级:</label>
+            <input type="number" id="customPunishmentLevel" min="1" max="100" placeholder="输入等级">
+            <button class="btn btn-danger" onclick="applyPunishment()">执行神罚</button>
+          </div>
+        </div>
+        <div class="punishment-popup-footer">
+          <button class="btn btn-secondary" onclick="closePunishmentPopup()">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="js/config.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/fishSystem.js"></script>
+  <script src="js/gameLogic.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

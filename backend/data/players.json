@@ -1,0 +1,25 @@
+[
+  {
+    "name": "101",
+    "level": 4,
+    "experience": 580,
+    "score": 970,
+    "size": 50
+  },
+  {
+    "name": "101",
+    "mode": "hard",
+    "level": 1,
+    "experience": 0,
+    "score": 110,
+    "size": 20
+  },
+  {
+    "name": "玩家",
+    "mode": "hard",
+    "level": 1,
+    "experience": 0,
+    "score": 2920,
+    "size": 20
+  }
+]
