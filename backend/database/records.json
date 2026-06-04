@@ -7,5 +7,14 @@
     "score": 34430,
     "time_seconds": 396,
     "created_at": "2026-06-03T09:32:48.808Z"
+  },
+  {
+    "id": 2,
+    "user_id": 4,
+    "mode": "hard",
+    "level": 3,
+    "score": 220,
+    "time_seconds": 134,
+    "created_at": "2026-06-04T07:21:53.591Z"
   }
 ]

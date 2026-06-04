@@ -54,9 +54,53 @@ function initCanvas() {
     mouseY = e.clientY;
   });
   
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchDeltaX = 0;
+  let touchDeltaY = 0;
+  
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+  });
+  
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchDeltaX = touch.clientX - touchStartX;
+    touchDeltaY = touch.clientY - touchStartY;
+    
+    if (player) {
+      const speed = player.getSpeed();
+      mouseX = touch.clientX;
+      mouseY = touch.clientY;
+    }
+  });
+  
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+  });
+  
   window.addEventListener('keydown', (e) => {
     const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
     const key = e.key.toLowerCase();
+    
+    if (e.key === 'Enter' && isTyping) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      if (loginForm.style.display !== 'none') {
+        handleLogin();
+      } else if (registerForm.style.display !== 'none') {
+        handleRegister();
+      }
+      e.preventDefault();
+      return;
+    }
+    
     if (!isTyping && (key === 'w' || key === 'a' || key === 's' || key === 'd')) {
       useKeyboard = true;
       if (player) {

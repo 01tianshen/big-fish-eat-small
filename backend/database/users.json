@@ -37,5 +37,18 @@
     "title": "流浪斗罗",
     "created_at": "2026-06-03T12:05:47.705Z",
     "updated_at": "2026-06-03T12:06:58.863Z"
+  },
+  {
+    "id": 4,
+    "username": "小王你好",
+    "password": "xiaowang003",
+    "email": null,
+    "is_admin": 0,
+    "total_score": 920000,
+    "level": 93,
+    "last_level": 93,
+    "title": "辅助系斗罗",
+    "created_at": "2026-06-04T07:18:47.859Z",
+    "updated_at": "2026-06-04T07:23:28.675Z"
   }
 ]
