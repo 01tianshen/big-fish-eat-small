@@ -7,11 +7,14 @@ const path = require('path');
 const playerRoutes = require('./routes/player');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const friendRoutes = require('./routes/friend');
 
 const dbDir = path.join(__dirname, 'database');
 const usersFile = path.join(dbDir, 'users.json');
 const recordsFile = path.join(dbDir, 'records.json');
 const progressFile = path.join(dbDir, 'progress.json');
+const friendsFile = path.join(dbDir, 'friends.json');
+const messagesFile = path.join(dbDir, 'messages.json');
 
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
@@ -20,7 +23,7 @@ if (!fs.existsSync(dbDir)) {
 function initDatabase() {
   if (!fs.existsSync(usersFile)) {
     fs.writeFileSync(usersFile, JSON.stringify([
-      { id: 1, username: 'admin', password: 'admin123', email: null, is_admin: 1, total_score: 999999, level: 100, last_level: 100, title: '海神', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+      { id: 1, username: 'admin', password: 'admin123', email: null, is_admin: 1, total_score: 999999, level: 100, last_level: 100, title: '海神', feed_shrimp: 10, feed_squid: 10, feed_crab: 10, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
     ], null, 2));
     console.log('已创建默认管理员账户: admin/admin123');
   } else {
@@ -44,6 +47,18 @@ function initDatabase() {
         u.title = '';
         needUpdate = true;
       }
+      if (!('feed_shrimp' in u) || u.feed_shrimp === undefined) {
+        u.feed_shrimp = 5;
+        needUpdate = true;
+      }
+      if (!('feed_squid' in u) || u.feed_squid === undefined) {
+        u.feed_squid = 3;
+        needUpdate = true;
+      }
+      if (!('feed_crab' in u) || u.feed_crab === undefined) {
+        u.feed_crab = 1;
+        needUpdate = true;
+      }
       return u;
     });
     if (needUpdate) {
@@ -58,6 +73,14 @@ function initDatabase() {
   
   if (!fs.existsSync(progressFile)) {
     fs.writeFileSync(progressFile, JSON.stringify([], null, 2));
+  }
+  
+  if (!fs.existsSync(friendsFile)) {
+    fs.writeFileSync(friendsFile, JSON.stringify([], null, 2));
+  }
+  
+  if (!fs.existsSync(messagesFile)) {
+    fs.writeFileSync(messagesFile, JSON.stringify([], null, 2));
   }
 }
 
@@ -95,6 +118,9 @@ global.db = {
           level: 1,
           last_level: 1,
           title: '',
+          feed_shrimp: 5,
+          feed_squid: 3,
+          feed_crab: 1,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
@@ -126,6 +152,13 @@ global.db = {
           } else if (query.includes('last_level = ?')) {
             // 只更新last_level（玩家接受赐福时）
             users[index].last_level = params[0];
+          } else if (query.includes('feed_shrimp = ?')) {
+            // 更新饲料包
+            users[index].feed_shrimp = params[0];
+          } else if (query.includes('feed_squid = ?')) {
+            users[index].feed_squid = params[0];
+          } else if (query.includes('feed_crab = ?')) {
+            users[index].feed_crab = params[0];
           }
           users[index].updated_at = new Date().toISOString();
           fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
@@ -207,6 +240,68 @@ global.db = {
       const progress = JSON.parse(fs.readFileSync(progressFile, 'utf8'));
       return progress;
     }
+  },
+  friends: {
+    all: () => JSON.parse(fs.readFileSync(friendsFile, 'utf8')),
+    run: (query, params) => {
+      let friends = JSON.parse(fs.readFileSync(friendsFile, 'utf8'));
+      if (query.includes('INSERT INTO friends')) {
+        const newId = friends.length > 0 ? Math.max(...friends.map(f => f.id)) + 1 : 1;
+        friends.push({
+          id: newId,
+          user_id: params[0],
+          friend_id: params[1],
+          status: params[2] || 'pending',
+          created_at: new Date().toISOString()
+        });
+        fs.writeFileSync(friendsFile, JSON.stringify(friends, null, 2));
+        return { lastID: newId };
+      }
+      if (query.includes('UPDATE friends')) {
+        const index = friends.findIndex(f => f.id === params[0]);
+        if (index !== -1) {
+          friends[index].status = params[1];
+          fs.writeFileSync(friendsFile, JSON.stringify(friends, null, 2));
+        }
+        return { changes: 1 };
+      }
+      if (query.includes('DELETE FROM friends')) {
+        friends = friends.filter(f => (f.user_id !== params[0] || f.friend_id !== params[1]) && 
+                                     (f.user_id !== params[1] || f.friend_id !== params[0]));
+        fs.writeFileSync(friendsFile, JSON.stringify(friends, null, 2));
+        return { changes: friends.length };
+      }
+    }
+  },
+  messages: {
+    all: () => JSON.parse(fs.readFileSync(messagesFile, 'utf8')),
+    run: (query, params) => {
+      let messages = JSON.parse(fs.readFileSync(messagesFile, 'utf8'));
+      if (query.includes('INSERT INTO messages')) {
+        const newId = messages.length > 0 ? Math.max(...messages.map(m => m.id)) + 1 : 1;
+        messages.push({
+          id: newId,
+          from_id: params[0],
+          to_id: params[1],
+          content: params[2],
+          type: params[3] || 'text',
+          created_at: new Date().toISOString(),
+          read: false
+        });
+        fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
+        return { lastID: newId };
+      }
+      if (query.includes('UPDATE messages')) {
+        messages = messages.map(m => {
+          if (m.from_id === params[1] && m.to_id === params[0]) {
+            m.read = true;
+          }
+          return m;
+        });
+        fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
+        return { changes: 1 };
+      }
+    }
   }
 };
 
@@ -220,6 +315,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api', playerRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/friend', friendRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: '服务器运行正常' });

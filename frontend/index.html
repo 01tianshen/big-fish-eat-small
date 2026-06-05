@@ -82,6 +82,7 @@
         <div class="user-bar">
           <span id="currentUser">欢迎</span>
           <button class="records-btn" onclick="loadUserRecords(1)">📊 我的记录</button>
+          <button class="friends-btn" onclick="showFriendsPanel()">👥 好友</button>
           <button class="ranking-btn" onclick="loadRanking()">🏆 排行榜</button>
           <button class="logout-btn" onclick="logout()">退出登录</button>
           <button class="admin-btn" id="adminPanelBtn" style="display: none;" onclick="loadAdminPanel()">管理面板</button>
@@ -325,6 +326,103 @@
         </div>
         <div class="punishment-popup-footer">
           <button class="btn btn-secondary" onclick="closePunishmentPopup()">取消</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="friends-panel" id="friendsPanel" style="display: none;">
+      <div class="friends-content">
+        <div class="friends-header">
+          <h2>👥 好友系统</h2>
+          <button class="close-btn" onclick="closeFriendsPanel()">✕</button>
+        </div>
+        
+        <div class="friends-tabs">
+          <button class="friends-tab active" data-tab="list" onclick="showFriendsTab('list')">好友列表</button>
+          <button class="friends-tab" data-tab="requests" onclick="showFriendsTab('requests')">好友请求</button>
+          <button class="friends-tab" data-tab="add" onclick="showFriendsTab('add')">添加好友</button>
+        </div>
+        
+        <div class="friends-body">
+          <div id="friendsList" class="friends-tab-content">
+            <div class="friends-loading">加载中...</div>
+          </div>
+          
+          <div id="friendsRequests" class="friends-tab-content" style="display: none;">
+            <div class="friends-loading">加载中...</div>
+          </div>
+          
+          <div id="friendsAdd" class="friends-tab-content" style="display: none;">
+            <input type="text" id="friendUsername" placeholder="输入好友用户名">
+            <button class="btn btn-primary" onclick="handleAddFriend()">添加好友</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-panel" id="chatPanel" style="display: none;">
+      <div class="chat-content">
+        <div class="chat-header">
+          <h2 id="chatFriendName">聊天</h2>
+          <button class="close-btn" onclick="closeChatPanel()">✕</button>
+        </div>
+        
+        <div class="feed-display">
+          <div class="feed-item">
+            <span class="feed-icon">🦐</span>
+            <span class="feed-name">浅滩磷虾包</span>
+            <span class="feed-count" id="feedShrimp">0</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-icon">🦑</span>
+            <span class="feed-name">远洋鱿粒包</span>
+            <span class="feed-count" id="feedSquid">0</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-icon">🦀</span>
+            <span class="feed-name">深海鳌鲜包</span>
+            <span class="feed-count" id="feedCrab">0</span>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages"></div>
+        
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="输入消息..." onkeydown="if(event.keyCode===13)sendChatMessage()">
+          <button class="btn btn-primary" onclick="sendChatMessage()">发送</button>
+          <button class="btn btn-secondary" onclick="showFeedSendPanel()">赠送饲料包</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feed-send-panel" id="feedSendPanel" style="display: none;">
+      <div class="feed-send-content">
+        <div class="feed-send-header">
+          <h2>🎁 赠送饲料包</h2>
+          <button class="close-btn" onclick="closeFeedSendPanel()">✕</button>
+        </div>
+        <div class="feed-send-body">
+          <div class="feed-send-item">
+            <span class="feed-icon">🦐</span>
+            <span class="feed-name">浅滩磷虾包</span>
+            <span class="feed-available">拥有: <span id="sendFeedShrimp">0</span></span>
+            <input type="number" id="sendAmountShrimp" min="1" max="10" placeholder="数量">
+            <button class="btn btn-primary" onclick="sendFeedToFriend('shrimp')">赠送</button>
+          </div>
+          <div class="feed-send-item">
+            <span class="feed-icon">🦑</span>
+            <span class="feed-name">远洋鱿粒包</span>
+            <span class="feed-available">拥有: <span id="sendFeedSquid">0</span></span>
+            <input type="number" id="sendAmountSquid" min="1" max="10" placeholder="数量">
+            <button class="btn btn-primary" onclick="sendFeedToFriend('squid')">赠送</button>
+          </div>
+          <div class="feed-send-item">
+            <span class="feed-icon">🦀</span>
+            <span class="feed-name">深海鳌鲜包</span>
+            <span class="feed-available">拥有: <span id="sendFeedCrab">0</span></span>
+            <input type="number" id="sendAmountCrab" min="1" max="10" placeholder="数量">
+            <button class="btn btn-primary" onclick="sendFeedToFriend('crab')">赠送</button>
+          </div>
         </div>
       </div>
     </div>

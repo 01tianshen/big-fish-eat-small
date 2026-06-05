@@ -252,5 +252,163 @@ const API = {
       console.error('获取已使用称号失败:', error);
       return { success: true, titles: [] };
     }
+  },
+  
+  async addFriend(userId, friendUsername) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, friendUsername })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('添加好友失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async getFriendList(userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/list?userId=${userId}`);
+      return await response.json();
+    } catch (error) {
+      console.error('获取好友列表失败:', error);
+      return { success: false, friends: [] };
+    }
+  },
+  
+  async getFriendRequests(userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/requests?userId=${userId}`);
+      return await response.json();
+    } catch (error) {
+      console.error('获取好友请求失败:', error);
+      return { success: false, requests: [] };
+    }
+  },
+  
+  async acceptFriend(requestId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/accept`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requestId })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('接受好友请求失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async rejectFriend(requestId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ requestId })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('拒绝好友请求失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async removeFriend(userId, friendId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/remove`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, friendId })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('删除好友失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async sendMessage(fromId, toId, content) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fromId, toId, content })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('发送消息失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async getMessages(userId, friendId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/messages?userId=${userId}&friendId=${friendId}`);
+      return await response.json();
+    } catch (error) {
+      console.error('获取消息失败:', error);
+      return { success: false, messages: [] };
+    }
+  },
+  
+  async sendFeed(fromId, toId, feedType, amount) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/friend/send-feed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fromId, toId, feedType, amount })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('赠送饲料包失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async blessingFeed(adminId, userId, feedType, amount) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/blessing-feed?userId=${adminId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, feedType, amount })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('赐福饲料包失败:', error);
+      return { success: false, message: '网络错误' };
+    }
+  },
+  
+  async punishmentFeed(adminId, userId, feedType, amount) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/punishment-feed?userId=${adminId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, feedType, amount })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('神罚饲料包失败:', error);
+      return { success: false, message: '网络错误' };
+    }
   }
 };

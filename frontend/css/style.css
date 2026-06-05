@@ -1408,6 +1408,386 @@ body {
   transform: scale(1.05);
 }
 
+.friends-btn {
+  background: linear-gradient(180deg, #4ad94a, #35bd35);
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.friends-btn:hover {
+  background: linear-gradient(180deg, #5ae95a, #45cd45);
+}
+
+.friends-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 40, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 300;
+  overflow-y: auto;
+}
+
+.friends-content {
+  background: linear-gradient(180deg, rgba(0, 60, 120, 0.98), rgba(0, 40, 80, 0.98));
+  padding: 30px;
+  border-radius: 20px;
+  border: 3px solid rgba(100, 200, 255, 0.5);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.friends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.friends-header h2 {
+  color: #ffd700;
+  font-size: 24px;
+}
+
+.friends-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.friends-tab {
+  flex: 1;
+  padding: 12px;
+  background: rgba(0, 50, 100, 0.6);
+  color: #87ceeb;
+  border: 2px solid rgba(100, 200, 255, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.friends-tab:hover {
+  background: rgba(0, 70, 130, 0.8);
+}
+
+.friends-tab.active {
+  background: rgba(74, 217, 74, 0.3);
+  border-color: #4ad94a;
+  color: #4ad94a;
+}
+
+.friends-body {
+  min-height: 200px;
+}
+
+.friends-loading {
+  text-align: center;
+  color: #87ceeb;
+  padding: 40px;
+}
+
+.friends-list, .requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.friend-item, .request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(0, 30, 60, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 200, 255, 0.2);
+}
+
+.friend-info, .request-info {
+  flex: 1;
+}
+
+.friend-name, .request-name {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  display: block;
+}
+
+.friend-level, .request-level {
+  color: #87ceeb;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+.friend-actions, .request-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.friend-actions .btn, .request-actions .btn {
+  padding: 8px 15px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+#friendsAdd input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 14px;
+  border: 2px solid rgba(100, 200, 255, 0.5);
+  border-radius: 10px;
+  background: rgba(0, 40, 80, 0.8);
+  color: white;
+  margin-bottom: 15px;
+  outline: none;
+}
+
+#friendsAdd input:focus {
+  border-color: #ffd700;
+}
+
+#friendsAdd button {
+  width: 100%;
+}
+
+.chat-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 40, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 300;
+  overflow-y: auto;
+}
+
+.chat-content {
+  background: linear-gradient(180deg, rgba(0, 60, 120, 0.98), rgba(0, 40, 80, 0.98));
+  padding: 20px;
+  border-radius: 20px;
+  border: 3px solid rgba(100, 200, 255, 0.5);
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chat-header h2 {
+  color: #ffd700;
+  font-size: 20px;
+}
+
+.feed-display {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 30, 60, 0.8);
+  border-radius: 10px;
+}
+
+.feed-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #87ceeb;
+  font-size: 14px;
+}
+
+.feed-icon {
+  font-size: 20px;
+}
+
+.feed-count {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  background: rgba(0, 30, 60, 0.8);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.chat-message {
+  margin-bottom: 15px;
+  max-width: 70%;
+}
+
+.chat-message.me {
+  margin-left: auto;
+}
+
+.chat-message.other {
+  margin-right: auto;
+}
+
+.message-content {
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.chat-message.me .message-content {
+  background: linear-gradient(180deg, #4a90d9, #357abd);
+  color: white;
+  border-radius: 15px 15px 5px 15px;
+}
+
+.chat-message.other .message-content {
+  background: rgba(100, 200, 255, 0.3);
+  color: white;
+  border-radius: 15px 15px 15px 5px;
+}
+
+.message-time {
+  font-size: 11px;
+  color: rgba(135, 206, 235, 0.6);
+  margin-top: 5px;
+  text-align: right;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  padding: 12px 15px;
+  font-size: 14px;
+  border: 2px solid rgba(100, 200, 255, 0.5);
+  border-radius: 20px;
+  background: rgba(0, 40, 80, 0.8);
+  color: white;
+  outline: none;
+}
+
+.chat-input-area input:focus {
+  border-color: #ffd700;
+}
+
+.chat-input-area button {
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+.feed-send-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 40, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 500;
+}
+
+.feed-send-content {
+  background: linear-gradient(180deg, rgba(0, 60, 120, 0.98), rgba(0, 40, 80, 0.98));
+  padding: 30px;
+  border-radius: 20px;
+  border: 3px solid rgba(255, 215, 0, 0.5);
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.feed-send-header h2 {
+  color: #ffd700;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.feed-send-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feed-send-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: rgba(0, 30, 60, 0.8);
+  border-radius: 10px;
+}
+
+.feed-send-item .feed-icon {
+  font-size: 28px;
+}
+
+.feed-send-item .feed-name {
+  flex: 1;
+  color: #87ceeb;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
+.feed-available {
+  color: #ffd700;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.feed-send-item input {
+  width: 60px;
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid rgba(100, 200, 255, 0.5);
+  border-radius: 8px;
+  background: rgba(0, 40, 80, 0.8);
+  color: white;
+  text-align: center;
+  outline: none;
+}
+
+.feed-send-item input:focus {
+  border-color: #ffd700;
+}
+
+.feed-send-item button {
+  padding: 8px 15px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
 @media screen and (max-width: 768px) {
   body {
     background: #001a33;

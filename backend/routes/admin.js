@@ -43,6 +43,9 @@ router.get('/users', isAdmin, (req, res) => {
       total_score: row.total_score || 0,
       title: row.title || '',
       title_name: getLevelTitle(row.level || 1),
+      feed_shrimp: row.feed_shrimp || 0,
+      feed_squid: row.feed_squid || 0,
+      feed_crab: row.feed_crab || 0,
       created_at: row.created_at
     }))
   });
@@ -173,6 +176,100 @@ router.get('/statistics', isAdmin, (req, res) => {
   };
   
   res.json({ success: true, statistics: stats });
+});
+
+router.post('/blessing-feed', isAdmin, (req, res) => {
+  const { userId, feedType, amount } = req.body;
+  
+  if (!userId || !feedType || !amount) {
+    return res.json({ success: false, message: '参数不能为空' });
+  }
+  
+  const targetUser = db.users.get('SELECT * FROM users WHERE id = ?', [parseInt(userId)]);
+  
+  if (!targetUser) {
+    return res.json({ success: false, message: '用户不存在' });
+  }
+  
+  const feedNames = {
+    shrimp: '浅滩磷虾包',
+    squid: '远洋鱿粒包',
+    crab: '深海鳌鲜包'
+  };
+  
+  if (!feedNames[feedType]) {
+    return res.json({ success: false, message: '无效的饲料包类型' });
+  }
+  
+  const users = db.users.all();
+  const index = users.findIndex(u => u.id === parseInt(userId));
+  if (index !== -1) {
+    const feedField = `feed_${feedType}`;
+    users[index][feedField] = (users[index][feedField] || 0) + parseInt(amount);
+    
+    const fs = require('fs');
+    const path = require('path');
+    const usersFile = path.join(__dirname, '../database/users.json');
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+    
+    res.json({ 
+      success: true, 
+      message: `海神赐福！${targetUser.username} 获得 ${amount} 个${feedNames[feedType]}`
+    });
+  } else {
+    res.json({ success: false, message: '用户不存在' });
+  }
+});
+
+router.post('/punishment-feed', isAdmin, (req, res) => {
+  const { userId, feedType, amount } = req.body;
+  
+  if (!userId || !feedType || !amount) {
+    return res.json({ success: false, message: '参数不能为空' });
+  }
+  
+  const targetUser = db.users.get('SELECT * FROM users WHERE id = ?', [parseInt(userId)]);
+  
+  if (!targetUser) {
+    return res.json({ success: false, message: '用户不存在' });
+  }
+  
+  if (targetUser.is_admin) {
+    return res.json({ success: false, message: '不能对管理员实施神罚' });
+  }
+  
+  const feedNames = {
+    shrimp: '浅滩磷虾包',
+    squid: '远洋鱿粒包',
+    crab: '深海鳌鲜包'
+  };
+  
+  if (!feedNames[feedType]) {
+    return res.json({ success: false, message: '无效的饲料包类型' });
+  }
+  
+  const feedField = `feed_${feedType}`;
+  if ((targetUser[feedField] || 0) < parseInt(amount)) {
+    return res.json({ success: false, message: '扣除的饲料包数量超过用户拥有量' });
+  }
+  
+  const users = db.users.all();
+  const index = users.findIndex(u => u.id === parseInt(userId));
+  if (index !== -1) {
+    users[index][feedField] = Math.max(0, (users[index][feedField] || 0) - parseInt(amount));
+    
+    const fs = require('fs');
+    const path = require('path');
+    const usersFile = path.join(__dirname, '../database/users.json');
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+    
+    res.json({ 
+      success: true, 
+      message: `神罚降临！${targetUser.username} 被扣除 ${amount} 个${feedNames[feedType]}`
+    });
+  } else {
+    res.json({ success: false, message: '用户不存在' });
+  }
 });
 
 module.exports = router;

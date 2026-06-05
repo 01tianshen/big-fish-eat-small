@@ -231,10 +231,28 @@ async function saveGame() {
   alert('游戏已保存！');
 }
 
+async function addFeedPackage(userId, mode) {
+  try {
+    const response = await fetch('https://big-fish-eat-small-production.up.railway.app/api/user/addfeed', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userId, mode })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('发放饲料包失败:', error);
+    return { success: false, message: '网络错误' };
+  }
+}
+
 async function showGameOver() {
   isGameRunning = false;
   
   const gameTime = Math.floor((Date.now() - gameStartTime) / 1000);
+  
+  await addFeedPackage(currentUser.id, selectedMode);
   
   await API.savePlayer({
     userId: currentUser.id,
@@ -822,3 +840,245 @@ window.applyPunishment = applyPunishment;
 window.closePunishmentNotification = closePunishmentNotification;
 window.acceptBlessing = acceptBlessing;
 window.rejectBlessing = rejectBlessing;
+window.showFriendsPanel = showFriendsPanel;
+window.closeFriendsPanel = closeFriendsPanel;
+window.showFriendsTab = showFriendsTab;
+window.handleAddFriend = handleAddFriend;
+window.acceptFriendRequest = acceptFriendRequest;
+window.rejectFriendRequest = rejectFriendRequest;
+window.removeFriend = removeFriend;
+window.openChat = openChat;
+window.closeChatPanel = closeChatPanel;
+window.sendChatMessage = sendChatMessage;
+window.showFeedSendPanel = showFeedSendPanel;
+window.closeFeedSendPanel = closeFeedSendPanel;
+window.sendFeedToFriend = sendFeedToFriend;
+
+let currentChatFriend = null;
+
+function showFriendsPanel() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('friendsPanel').style.display = 'flex';
+  showFriendsTab('list');
+}
+
+function closeFriendsPanel() {
+  document.getElementById('friendsPanel').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+}
+
+function showFriendsTab(tab) {
+  document.querySelectorAll('.friends-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.friends-tab[data-tab="${tab}"]`).classList.add('active');
+  
+  document.querySelectorAll('.friends-tab-content').forEach(c => c.style.display = 'none');
+  
+  if (tab === 'list') {
+    loadFriendsList();
+  } else if (tab === 'requests') {
+    loadFriendRequests();
+  }
+  
+  document.getElementById(`friends${tab.charAt(0).toUpperCase() + tab.slice(1)}`).style.display = 'block';
+}
+
+async function loadFriendsList() {
+  const result = await API.getFriendList(currentUser.id);
+  
+  if (result.success) {
+    const friendsList = document.getElementById('friendsList');
+    if (result.friends.length === 0) {
+      friendsList.innerHTML = '<div style="text-align: center; color: #87ceeb;">暂无好友，快去添加好友吧！</div>';
+    } else {
+      friendsList.innerHTML = `
+        <div class="friends-list">
+          ${result.friends.map(friend => `
+            <div class="friend-item">
+              <div class="friend-info">
+                <span class="friend-name">${friend.username}</span>
+                <span class="friend-level">LV${friend.level || 1} ${friend.title || getLevelTitle(friend.level || 1)}</span>
+              </div>
+              <div class="friend-actions">
+                <button class="btn btn-primary" onclick="openChat(${friend.id}, '${friend.username}')">聊天</button>
+                <button class="btn btn-danger" onclick="removeFriend(${friend.id})">删除</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+}
+
+async function loadFriendRequests() {
+  const result = await API.getFriendRequests(currentUser.id);
+  
+  if (result.success) {
+    const requestsList = document.getElementById('friendsRequests');
+    if (result.requests.length === 0) {
+      requestsList.innerHTML = '<div style="text-align: center; color: #87ceeb;">暂无好友请求</div>';
+    } else {
+      requestsList.innerHTML = `
+        <div class="requests-list">
+          ${result.requests.map(req => `
+            <div class="request-item">
+              <div class="request-info">
+                <span class="request-name">${req.username}</span>
+                <span class="request-level">LV${req.level || 1}</span>
+              </div>
+              <div class="request-actions">
+                <button class="btn btn-primary" onclick="acceptFriendRequest(${req.requestId})">接受</button>
+                <button class="btn btn-danger" onclick="rejectFriendRequest(${req.requestId})">拒绝</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+}
+
+async function handleAddFriend() {
+  const username = document.getElementById('friendUsername').value.trim();
+  
+  if (!username) {
+    alert('请输入好友用户名');
+    return;
+  }
+  
+  const result = await API.addFriend(currentUser.id, username);
+  
+  if (result.success) {
+    alert('好友请求已发送');
+    document.getElementById('friendUsername').value = '';
+  } else {
+    alert(result.message);
+  }
+}
+
+async function acceptFriendRequest(requestId) {
+  const result = await API.acceptFriend(requestId);
+  
+  if (result.success) {
+    alert('已接受好友请求');
+    showFriendsTab('list');
+  } else {
+    alert(result.message);
+  }
+}
+
+async function rejectFriendRequest(requestId) {
+  const result = await API.rejectFriend(requestId);
+  
+  if (result.success) {
+    alert('已拒绝好友请求');
+    showFriendsTab('requests');
+  } else {
+    alert(result.message);
+  }
+}
+
+async function removeFriend(friendId) {
+  if (!confirm('确定要删除这个好友吗？')) return;
+  
+  const result = await API.removeFriend(currentUser.id, friendId);
+  
+  if (result.success) {
+    alert('已删除好友');
+    loadFriendsList();
+  } else {
+    alert(result.message);
+  }
+}
+
+async function openChat(friendId, friendName) {
+  currentChatFriend = { id: friendId, name: friendName };
+  document.getElementById('chatFriendName').textContent = `与 ${friendName} 聊天`;
+  document.getElementById('friendsPanel').style.display = 'none';
+  document.getElementById('chatPanel').style.display = 'flex';
+  loadChatMessages();
+  loadFeedDisplay();
+}
+
+function closeChatPanel() {
+  document.getElementById('chatPanel').style.display = 'none';
+  document.getElementById('friendsPanel').style.display = 'flex';
+  currentChatFriend = null;
+}
+
+async function loadChatMessages() {
+  const result = await API.getMessages(currentUser.id, currentChatFriend.id);
+  
+  if (result.success) {
+    const messagesDiv = document.getElementById('chatMessages');
+    messagesDiv.innerHTML = result.messages.map(msg => {
+      const isMe = msg.from_id === currentUser.id;
+      return `
+        <div class="chat-message ${isMe ? 'me' : 'other'}">
+          <div class="message-content">${msg.content}</div>
+          <div class="message-time">${new Date(msg.created_at).toLocaleString()}</div>
+        </div>
+      `;
+    }).join('');
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+}
+
+async function sendChatMessage() {
+  const content = document.getElementById('chatInput').value.trim();
+  
+  if (!content || !currentChatFriend) return;
+  
+  const result = await API.sendMessage(currentUser.id, currentChatFriend.id, content);
+  
+  if (result.success) {
+    document.getElementById('chatInput').value = '';
+    loadChatMessages();
+  } else {
+    alert(result.message);
+  }
+}
+
+async function loadFeedDisplay() {
+  const userInfo = await API.getUserInfo(currentUser.id);
+  
+  if (userInfo.success) {
+    document.getElementById('feedShrimp').textContent = userInfo.feed_shrimp || 0;
+    document.getElementById('feedSquid').textContent = userInfo.feed_squid || 0;
+    document.getElementById('feedCrab').textContent = userInfo.feed_crab || 0;
+    document.getElementById('sendFeedShrimp').textContent = userInfo.feed_shrimp || 0;
+    document.getElementById('sendFeedSquid').textContent = userInfo.feed_squid || 0;
+    document.getElementById('sendFeedCrab').textContent = userInfo.feed_crab || 0;
+  }
+}
+
+function showFeedSendPanel() {
+  document.getElementById('chatPanel').style.display = 'none';
+  document.getElementById('feedSendPanel').style.display = 'flex';
+}
+
+function closeFeedSendPanel() {
+  document.getElementById('feedSendPanel').style.display = 'none';
+  document.getElementById('chatPanel').style.display = 'flex';
+}
+
+async function sendFeedToFriend(feedType) {
+  const amountInput = document.getElementById(`sendAmount${feedType.charAt(0).toUpperCase() + feedType.slice(1)}`);
+  const amount = parseInt(amountInput.value);
+  
+  if (!amount || amount < 1) {
+    alert('请输入有效的数量');
+    return;
+  }
+  
+  const result = await API.sendFeed(currentUser.id, currentChatFriend.id, feedType, amount);
+  
+  if (result.success) {
+    alert('饲料包已赠送');
+    amountInput.value = '';
+    closeFeedSendPanel();
+    loadFeedDisplay();
+  } else {
+    alert(result.message);
+  }
+}

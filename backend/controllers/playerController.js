@@ -239,3 +239,31 @@ exports.getAllTitles = (req, res) => {
   
   res.json({ success: true, titles: allTitles });
 };
+
+exports.addFeedPackage = (req, res) => {
+  const { userId, mode } = req.body;
+  
+  const feedTypes = {
+    easy: 'feed_shrimp',
+    normal: 'feed_squid',
+    hard: 'feed_crab'
+  };
+  
+  const feedField = feedTypes[mode] || 'feed_shrimp';
+  
+  const users = db.users.all();
+  const index = users.findIndex(u => u.id === parseInt(userId));
+  
+  if (index !== -1) {
+    users[index][feedField] = (users[index][feedField] || 0) + 1;
+    
+    const fs = require('fs');
+    const path = require('path');
+    const usersFile = path.join(__dirname, '../database/users.json');
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+    
+    res.json({ success: true, message: '饲料包已发放' });
+  } else {
+    res.json({ success: false, message: '用户不存在' });
+  }
+};

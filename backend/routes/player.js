@@ -11,5 +11,6 @@ router.get('/user/:userId', playerController.getUserInfo);
 router.post('/user/title', playerController.updateUserTitle);
 router.post('/user/lastlevel', playerController.updateUserLastLevel);
 router.get('/alltitles', playerController.getAllTitles);
+router.post('/user/addfeed', playerController.addFeedPackage);
 
 module.exports = router;
