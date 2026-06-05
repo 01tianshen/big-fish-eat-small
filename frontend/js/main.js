@@ -617,12 +617,7 @@ function showTitlePopup() {
   
   const usedTitlesDiv = document.getElementById('usedTitles');
   if (usedTitlesDiv) {
-    const result = await API.getAllTitles();
-    if (result.success && result.titles.length > 0) {
-      usedTitlesDiv.innerHTML = `<div style="margin-top: 15px; color: #ffaaaa; font-size: 12px;">已被使用的称号: ${result.titles.join('、')}</div>`;
-    } else {
-      usedTitlesDiv.innerHTML = '<div style="margin-top: 15px; color: #87ceeb; font-size: 12px;">暂无已被使用的称号</div>';
-    }
+    usedTitlesDiv.innerHTML = '';
   }
 }
 

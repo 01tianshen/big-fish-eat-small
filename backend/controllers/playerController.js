@@ -187,7 +187,7 @@ exports.updateUserTitle = (req, res) => {
   const existingUser = users.find(u => u.title === trimmedTitle && u.id !== userId);
   
   if (existingUser) {
-    return res.json({ success: false, message: '该称号已被使用，请选择其他称号' });
+    return res.json({ success: false, message: '当前果位已被占据！' });
   }
   
   db.users.run('UPDATE users SET title = ? WHERE id = ?', [trimmedTitle, userId]);
