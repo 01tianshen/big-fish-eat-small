@@ -242,5 +242,15 @@ const API = {
       console.error('获取统计数据失败:', error);
       return {};
     }
+  },
+  
+  async getAllTitles() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/alltitles`);
+      return await response.json();
+    } catch (error) {
+      console.error('获取已使用称号失败:', error);
+      return { success: true, titles: [] };
+    }
   }
 };

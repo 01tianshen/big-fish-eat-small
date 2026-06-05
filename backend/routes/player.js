@@ -10,5 +10,6 @@ router.get('/rank', playerController.getRank);
 router.get('/user/:userId', playerController.getUserInfo);
 router.post('/user/title', playerController.updateUserTitle);
 router.post('/user/lastlevel', playerController.updateUserLastLevel);
+router.get('/alltitles', playerController.getAllTitles);
 
 module.exports = router;

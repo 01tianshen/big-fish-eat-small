@@ -179,6 +179,17 @@ exports.updateUserTitle = (req, res) => {
   
   const trimmedTitle = title.trim().substring(0, 10);
   
+  if (!trimmedTitle) {
+    return res.json({ success: false, message: '称号不能为空' });
+  }
+  
+  const users = db.users.all();
+  const existingUser = users.find(u => u.title === trimmedTitle && u.id !== userId);
+  
+  if (existingUser) {
+    return res.json({ success: false, message: '该称号已被使用，请选择其他称号' });
+  }
+  
   db.users.run('UPDATE users SET title = ? WHERE id = ?', [trimmedTitle, userId]);
   
   res.json({ success: true, title: trimmedTitle });
@@ -217,4 +228,14 @@ exports.updateUserLastLevel = (req, res) => {
   db.users.run('UPDATE users SET last_level = ? WHERE id = ?', [level, userId]);
   
   res.json({ success: true });
+};
+
+exports.getAllTitles = (req, res) => {
+  const users = db.users.all();
+  
+  const allTitles = users
+    .filter(u => u.title && u.title.trim() !== '')
+    .map(u => u.title.trim());
+  
+  res.json({ success: true, titles: allTitles });
 };
